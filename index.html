@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Afkortingen Quiz App</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #eef2f3, #8e9eab);
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    h1, h2 {
+      text-align: center;
+      color: #222;
+    }
+    .onderdelen, .quiz-controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    button {
+      margin: 10px;
+      padding: 12px 24px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover { background-color: #45a049; }
+    .afkorting, .quiz-card {
+      background: white;
+      margin: 10px auto;
+      padding: 15px;
+      border-radius: 10px;
+      max-width: 600px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    .afkorting:hover { transform: scale(1.02); }
+    small {
+      display: block;
+      margin-top: 5px;
+      color: #666;
+    }
+    .search-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .search-container input {
+      padding: 10px;
+      width: 80%;
+      max-width: 400px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    .quiz-card input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Afkortingen Quiz App</h1>
+  <div class="search-container">
+    <input type="text" id="zoekbalk" oninput="zoekAfkorting()" placeholder="Zoek een afkorting...">
+  </div>
+  <h2>Kies een onderdeel</h2>
+  <div class="onderdelen">
+    <button onclick="toonOnderdeel('A')">Onderdeel A</button>
+    <button onclick="toonOnderdeel('B')">Onderdeel B</button>
+    <button onclick="toonOnderdeel('C')">Onderdeel C</button>
+    <button onclick="toonOnderdeel('D')">Onderdeel D</button>
+    <button onclick="toonOnderdeel('E')">Onderdeel E</button>
+    <button onclick="toonOnderdeel('F')">Onderdeel F</button>
+  </div>
+  <h2>Start een oefenvorm</h2>
+  <div class="quiz-controls">
+    <button onclick="toonOnderdeel(huidigeOnderdeel)">Oefenen (flashcards)</button>
+    <button onclick="startQuiz()">Toets (quiz)</button>
+  </div>
+  <div id="oefening"></div>
+  <script>
+    const afkortingen = {
+      A: [
+        { afk: \"AAT\", uitleg: \"Aan- en Afvoer Troepen\" },
+        { afk: \"AMO\", uitleg: \"Algemene Militaire Opleiding\" },
+        { afk: \"KCT\", uitleg: \"Korps Commando Troepen\" },
+        { afk: \"KMA\", uitleg: \"Koninklijke Militaire Academie\" },
+        { afk: \"KMAR\", uitleg: \"Koninklijke Marechaussee\" },
+        { afk: \"C.C.\", uitleg: \"Compagniescommandant\" },
+        { afk: \"C.Pag.\", uitleg: \"Compagnie pantserafweergeschut\" },
+        { afk: \"C.V.\", uitleg: \"Commandant van het Veldleger\" },
+        { afk: \"D.A.\", uitleg: \"Divisieartillerie\" },
+        { afk: \"E.H.\", uitleg: \"Eskadron Huzaren\" }
+      ],
+      B: [], C: [], D: [], E: [], F: []
+    };
+    let huidigeOnderdeel = 'A';
+    let quizIndex = 0;
+    let score = 0;
+    function toonOnderdeel(onderdeel) {
+      huidigeOnderdeel = onderdeel;
+      document.getElementById('zoekbalk').value = '';
+      const oefeningDiv = document.getElementById('oefening');
+      oefeningDiv.innerHTML = `<h2>Oefenen – Onderdeel ${onderdeel}</h2>`;
+      afkortingen[onderdeel].forEach(({ afk, uitleg }) => {
+        const div = document.createElement('div');
+        div.className = 'afkorting';
+        div.innerHTML = `<strong>${afk}</strong><small class='hidden'>${uitleg}</small>`;
+        div.onclick = () => {
+          const small = div.querySelector('small');
+          small.classList.toggle('hidden');
+        };
+        oefeningDiv.appendChild(div);
+      });
+    }
+    function zoekAfkorting() {
+      const query = document.getElementById('zoekbalk').value.toLowerCase();
+      const oefeningDiv = document.getElementById('oefening');
+      oefeningDiv.innerHTML = `<h2>Zoekresultaten voor \"${query}\"</h2>`;
+      afkortingen[huidigeOnderdeel]
+        .filter(({ afk, uitleg }) => afk.toLowerCase().includes(query) || uitleg.toLowerCase().includes(query))
+        .forEach(({ afk, uitleg }) => {
+          const div = document.createElement('div');
+          div.className = 'afkorting';
+          div.innerHTML = `<strong>${afk}</strong><small>${uitleg}</small>`;
+          oefeningDiv.appendChild(div);
+        });
+    }
+    function startQuiz() {
+      quizIndex = 0;
+      score = 0;
+      nextQuizVraag();
+    }
+    function nextQuizVraag() {
+      const vragen = afkortingen[huidigeOnderdeel];
+      const oefeningDiv = document.getElementById('oefening');
+      if (quizIndex >= vragen.length) {
+        oefeningDiv.innerHTML = `<h2>Quiz afgerond!</h2><p>Je score: ${score} / ${vragen.length}</p>`;
+        return;
+      }
+      const vraag = vragen[quizIndex];
+      oefeningDiv.innerHTML = `
+        <div class='quiz-card'>
+          <h2>Wat betekent: <strong>${vraag.afk}</strong>?</h2>
+          <input type='text' id='quizInput' placeholder='Typ hier je antwoord...' />
+          <button onclick='checkQuizAntwoord(\"${vraag.uitleg}\")'>Controleer</button>
+        </div>
+      `;
+    }
+    function checkQuizAntwoord(juisteAntwoord) {
+      const input = document.getElementById('quizInput').value.trim().toLowerCase();
+      if (input === juisteAntwoord.toLowerCase()) {
+        score++;
+        alert('Goed zo!');
+      } else {
+        alert(`Helaas! Het juiste antwoord is: ${juisteAntwoord}`);
+      }
+      quizIndex++;
+      nextQuizVraag();
+    }
+    toonOnderdeel('A');
+  </script>
+</body>
+</html>
