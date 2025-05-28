@@ -7,7 +7,7 @@
     body {
       font-family: Arial, sans-serif;
       margin: 0;
-      padding: 20px;
+      padding: 0;
       background: #f4f4f4;
     }
     h1, h2 {
@@ -20,6 +20,15 @@
     button {
       margin: 5px;
       padding: 10px 20px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #4CAF50;
+      color: white;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #45a049;
     }
     .card {
       background: white;
@@ -34,19 +43,27 @@
       padding: 10px;
       margin: 10px auto;
       display: block;
+      border-radius: 5px;
+      border: 1px solid #ccc;
     }
+    #mainApp { display: none; }
   </style>
 </head>
 <body>
-  <h1>Afkoapp</h1>  <input class="search-input" id="zoekbalk" type="text" placeholder="Zoek afkorting..." oninput="zoekAfkorting()">  <div class="controls">
-    <button onclick="selectOnderdeel('NL1')">NL1</button>
-    <button onclick="selectOnderdeel('NL2')">NL2</button>
-    <button onclick="selectOnderdeel('RANG')">Rangen</button>
-    <button onclick="selectOnderdeel('NAVO')">NAVO</button>
-  </div>  <div class="buttons">
-    <button onclick="toonFlashcards()">Flashcards</button>
-    <button onclick="startQuiz()">Quiz</button>
-  </div>  <div id="output"></div>  <script>
+  <div id="intro">
+    <h1>Welkom bij Afkoapp</h1>
+    <div style="text-align:center; margin: 30px;">
+      <button onclick="startApp()">Ik ben de baas</button>
+    </div>
+  </div>  <div id="mainApp">
+    <input class="search-input" id="zoekbalk" type="text" placeholder="Zoek afkorting..." oninput="zoekAfkorting()">
+    <div class="controls" id="onderdelen-buttons"></div>
+    <div class="buttons">
+      <button onclick="toonFlashcards()">Flashcards</button>
+      <button onclick="startQuiz()">Quiz</button>
+    </div>
+    <div id="output"></div>
+  </div>  <script>
     const afkortingen = {
       NL1: [
         { afk: "AAT", uitleg: "Aan- en Afvoer Troepen" },
@@ -67,9 +84,27 @@
       ]
     };
 
-    let current = 'NL1';
+    let current = Object.keys(afkortingen)[0];
     let quizIndex = 0;
     let score = 0;
+
+    function startApp() {
+      document.getElementById('intro').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'block';
+      initOnderdeelKnoppen();
+      selectOnderdeel(current);
+    }
+
+    function initOnderdeelKnoppen() {
+      const div = document.getElementById('onderdelen-buttons');
+      div.innerHTML = '';
+      for (let onderdeel in afkortingen) {
+        const btn = document.createElement('button');
+        btn.textContent = onderdeel;
+        btn.onclick = () => selectOnderdeel(onderdeel);
+        div.appendChild(btn);
+      }
+    }
 
     function selectOnderdeel(onderdeel) {
       current = onderdeel;
@@ -133,7 +168,5 @@
       quizIndex++;
       showQuiz();
     }
-
-    selectOnderdeel('NL1');
   </script></body>
 </html>
