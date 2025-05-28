@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="nl">
+      <!DOCTYPE html><html lang="nl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -142,6 +142,10 @@
       showQuiz();
     }
 
+    function normalizeText(text) {
+      return text.toLowerCase().replace(/[^a-z0-9]+/gi, '');
+    }
+
     function showQuiz() {
       const vragen = afkortingen[current];
       if (quizIndex >= vragen.length) {
@@ -158,8 +162,8 @@
     }
 
     function checkAntwoord(juiste) {
-      const antwoord = document.getElementById('antwoord').value.trim().toLowerCase();
-      if (antwoord === juiste.toLowerCase()) {
+      const antwoord = document.getElementById('antwoord').value;
+      if (normalizeText(antwoord) === normalizeText(juiste)) {
         score++;
         alert('Goed zo!');
       } else {
