@@ -1,4 +1,4 @@
-      <!DOCTYPE html><html lang="nl">
+<!DOCTYPE html><html lang="nl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -65,28 +65,39 @@
     <div id="output"></div>
   </div>  <script>
     const afkortingen = {
-      NL1: [
+      "Algemeen": [
         { afk: "AAT", uitleg: "Aan- en Afvoer Troepen" },
         { afk: "AMO", uitleg: "Algemene Militaire Opleiding" },
-        { afk: "KCT", uitleg: "Korps Commando Troepen" }
-      ],
-      NL2: [
         { afk: "CDS", uitleg: "Commandant der Strijdkrachten" },
-        { afk: "MIVD", uitleg: "Militaire Inlichtingen- en Veiligheidsdienst" }
+        { afk: "MIVD", uitleg: "Militaire Inlichtingen- en Veiligheidsdienst" },
+        { afk: "FOB", uitleg: "Forward Operating Base" },
+        { afk: "FTX", uitleg: "Field Training Exercise" },
+        { afk: "KLu", uitleg: "Koninklijke Luchtmacht" },
+        { afk: "KMar", uitleg: "Koninklijke Marechaussee" },
+        { afk: "MCW", uitleg: "Mechanisch Centrale Werkplaats" },
+        { afk: "MEOB", uitleg: "Marine Elektronisch en Optisch Bedrijf" },
+        { afk: "BSE", uitleg: "Battlefield Surgical Element" },
+        { afk: "SIGINT", uitleg: "Signals Intelligence" },
+        { afk: "ROE", uitleg: "Rules of Engagement" },
+        { afk: "ISTAR", uitleg: "Intelligence, Surveillance, Target Acquisition and Reconnaissance" }
       ],
-      RANG: [
-        { afk: "Sld", uitleg: "Soldaat" },
-        { afk: "Kpl", uitleg: "Korporaal" }
-      ],
-      NAVO: [
+      "NAVO": [
         { afk: "NATO", uitleg: "North Atlantic Treaty Organization" },
         { afk: "AWACS", uitleg: "Airborne Warning and Control System" }
+      ],
+      "Rangen": [
+        { afk: "Sld", uitleg: "Soldaat" },
+        { afk: "Kpl", uitleg: "Korporaal" },
+        { afk: "Sgt", uitleg: "Sergeant" },
+        { afk: "Lkol", uitleg: "Luitenant-kolonel" },
+        { afk: "Gen", uitleg: "Generaal" }
       ]
     };
 
     let current = Object.keys(afkortingen)[0];
     let quizIndex = 0;
     let score = 0;
+    let shuffledQuestions = [];
 
     function startApp() {
       document.getElementById('intro').style.display = 'none';
@@ -126,44 +137,45 @@
       const query = document.getElementById('zoekbalk').value.toLowerCase();
       const div = document.getElementById('output');
       div.innerHTML = '';
-      afkortingen[current].filter(item =>
-        item.afk.toLowerCase().includes(query) || item.uitleg.toLowerCase().includes(query)
-      ).forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `<strong>${item.afk}</strong><br><small>${item.uitleg}</small>`;
-        div.appendChild(card);
-      });
+      for (const onderdeel in afkortingen) {
+        afkortingen[onderdeel].filter(item =>
+          item.afk.toLowerCase().includes(query) || item.uitleg.toLowerCase().includes(query)
+        ).forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `<strong>${item.afk}</strong><br><small>${item.uitleg}</small>`;
+          div.appendChild(card);
+        });
+      }
     }
 
     function startQuiz() {
       quizIndex = 0;
       score = 0;
+      shuffledQuestions = shuffle([...afkortingen[current]]);
       showQuiz();
     }
 
-    function normalizeText(text) {
-      return text.toLowerCase().replace(/[^a-z0-9]+/gi, '');
-    }
-
     function showQuiz() {
-      const vragen = afkortingen[current];
+      const vragen = shuffledQuestions;
       if (quizIndex >= vragen.length) {
         document.getElementById('output').innerHTML = `<h2>Score: ${score} / ${vragen.length}</h2>`;
         return;
       }
+
       const vraag = vragen[quizIndex];
-      document.getElementById('output').innerHTML = `
-        <div class='card'>
-          <h3>${vraag.afk}</h3>
-          <input type='text' id='antwoord' placeholder='Wat betekent dit?'>
-          <button onclick='checkAntwoord("${vraag.uitleg}")'>Check</button>
-        </div>`;
+      const opties = shuffle([vraag.uitleg, ...genereerAfleiders(vraag.uitleg)]);
+
+      let html = `<div class='card'><h3>${vraag.afk}</h3>`;
+      opties.forEach(optie => {
+        html += `<button onclick="checkAntwoordKeuze('${vraag.uitleg}', '${optie}')">${optie}</button><br>`;
+      });
+      html += '</div>';
+      document.getElementById('output').innerHTML = html;
     }
 
-    function checkAntwoord(juiste) {
-      const antwoord = document.getElementById('antwoord').value;
-      if (normalizeText(antwoord) === normalizeText(juiste)) {
+    function checkAntwoordKeuze(juiste, gekozen) {
+      if (gekozen === juiste) {
         score++;
         alert('Goed zo!');
       } else {
@@ -171,6 +183,20 @@
       }
       quizIndex++;
       showQuiz();
+    }
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function genereerAfleiders(juiste) {
+      const alleUitleg = Object.values(afkortingen).flat().map(item => item.uitleg);
+      const unieke = alleUitleg.filter(u => u !== juiste);
+      return shuffle(unieke).slice(0, 3);
     }
   </script></body>
 </html>
