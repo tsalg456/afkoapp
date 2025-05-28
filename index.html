@@ -14,9 +14,14 @@
   </div>
 
   <div id="mainApp" class="hidden px-4 py-6">
-    <div class="text-center">
-      <h2 class="text-2xl font-semibold">Zoek Afkorting</h2>
-      <input id="zoekbalk" type="text" placeholder="Typ hier..." oninput="zoekAfkorting()" class="p-2 mt-2 rounded text-black w-full max-w-md mx-auto block">
+    <div class="text-center mb-4">
+      <h2 class="text-2xl font-semibold">Selecteer een categorie</h2>
+      <select id="categorieSelect" onchange="toonCategorie()" class="p-2 mt-2 rounded text-black w-full max-w-md mx-auto block">
+        <option value="">-- Kies een categorie --</option>
+      </select>
+    </div>
+    <div class="text-center mb-4">
+      <input id="zoekbalk" type="text" placeholder="Zoek afkorting..." oninput="zoekAfkorting()" class="p-2 rounded text-black w-full max-w-md mx-auto block">
     </div>
     <div class="mt-6 grid md:grid-cols-2 lg:grid-cols-3 gap-4" id="output"></div>
   </div>
@@ -24,65 +29,84 @@
   <script>
     const data = {
       "Landmacht": [
-        { "afkorting": "GEN", "uitleg": "Generaal" },
-        { "afkorting": "KCT", "uitleg": "Korps Commandotroepen" },
-        { "afkorting": "LMB", "uitleg": "Luchtmobiele Brigade" }
+        { afkorting: "GEN", uitleg: "Generaal" },
+        { afkorting: "KCT", uitleg: "Korps Commandotroepen" },
+        { afkorting: "LMB", uitleg: "Luchtmobiele Brigade" }
       ],
       "Luchtmacht": [
-        { "afkorting": "F-35", "uitleg": "Joint Strike Fighter" },
-        { "afkorting": "AWACS", "uitleg": "Airborne Warning and Control System" },
-        { "afkorting": "KLu", "uitleg": "Koninklijke Luchtmacht" }
+        { afkorting: "F-35", uitleg: "Joint Strike Fighter" },
+        { afkorting: "AWACS", uitleg: "Airborne Warning and Control System" },
+        { afkorting: "KLu", uitleg: "Koninklijke Luchtmacht" }
       ],
       "Marine": [
-        { "afkorting": "KLTZ", "uitleg": "Kapitein-luitenant ter zee" },
-        { "afkorting": "KTZ", "uitleg": "Kapitein ter zee" },
-        { "afkorting": "CDR", "uitleg": "Commandeur" }
+        { afkorting: "KLTZ", uitleg: "Kapitein-luitenant ter zee" },
+        { afkorting: "KTZ", uitleg: "Kapitein ter zee" },
+        { afkorting: "CDR", uitleg: "Commandeur" }
       ],
       "Marechaussee": [
-        { "afkorting": "WM", "uitleg": "Wachtmeester" },
-        { "afkorting": "KMAR", "uitleg": "Koninklijke Marechaussee" },
-        { "afkorting": "AOO", "uitleg": "Adjudant-onderofficier" }
+        { afkorting: "WM", uitleg: "Wachtmeester" },
+        { afkorting: "KMAR", uitleg: "Koninklijke Marechaussee" },
+        { afkorting: "AOO", uitleg: "Adjudant-onderofficier" }
       ],
       "Historisch": [
-        { "afkorting": "VM", "uitleg": "Veldmaarschalk" },
-        { "afkorting": "Bt.Lu.A.", "uitleg": "Batterij luchtdoelartillerie" },
-        { "afkorting": "C.Lu.Mitr.", "uitleg": "Compagnie luchtdoelmitrailleurs" }
+        { afkorting: "VM", uitleg: "Veldmaarschalk" },
+        { afkorting: "Bt.Lu.A.", uitleg: "Batterij luchtdoelartillerie" },
+        { afkorting: "C.Lu.Mitr.", uitleg: "Compagnie luchtdoelmitrailleurs" }
       ],
       "Vakken": [
-        { "afkorting": "Vak A", "uitleg": "Opleidingsonderdeel A" },
-        { "afkorting": "Vak B", "uitleg": "Opleidingsonderdeel B" },
-        { "afkorting": "Vak C", "uitleg": "Opleidingsonderdeel C" }
+        { afkorting: "Vak A", uitleg: "Opleidingsonderdeel A" },
+        { afkorting: "Vak B", uitleg: "Opleidingsonderdeel B" },
+        { afkorting: "Vak C", uitleg: "Opleidingsonderdeel C" }
       ],
       "Onderdelen": [
-        { "afkorting": "Peloton", "uitleg": "Militaire eenheid van ca. 30 man" },
-        { "afkorting": "Compagnie", "uitleg": "Militaire eenheid van ca. 100-150 man" },
-        { "afkorting": "Bataljon", "uitleg": "Militaire eenheid van ca. 500-1000 man" }
+        { afkorting: "Peloton", uitleg: "Militaire eenheid van ca. 30 man" },
+        { afkorting: "Compagnie", uitleg: "Militaire eenheid van ca. 100-150 man" },
+        { afkorting: "Bataljon", uitleg: "Militaire eenheid van ca. 500-1000 man" }
       ],
       "Overig": [
         // Automatisch gegenereerde dummy-afkortingen tot 300
         // Je kunt deze uitbreiden met echte data
         // Bijvoorbeeld:
-        { "afkorting": "AFK22", "uitleg": "Beschrijving van afkorting 22" },
-        { "afkorting": "AFK23", "uitleg": "Beschrijving van afkorting 23" },
-        { "afkorting": "AFK24", "uitleg": "Beschrijving van afkorting 24" },
+        { afkorting: "AFK22", uitleg: "Beschrijving van afkorting 22" },
+        { afkorting: "AFK23", uitleg: "Beschrijving van afkorting 23" },
+        { afkorting: "AFK24", uitleg: "Beschrijving van afkorting 24" },
         // ...
-        { "afkorting": "AFK300", "uitleg": "Beschrijving van afkorting 300" }
+        { afkorting: "AFK300", uitleg: "Beschrijving van afkorting 300" }
       ]
     };
 
     function startApp() {
       document.getElementById("mainApp").classList.remove("hidden");
+      const select = document.getElementById("categorieSelect");
+      for (let categorie in data) {
+        let option = document.createElement("option");
+        option.value = categorie;
+        option.text = categorie;
+        select.appendChild(option);
+      }
+    }
+
+    function toonCategorie() {
+      const categorie = document.getElementById("categorieSelect").value;
+      const zoekterm = document.getElementById("zoekbalk").value.toLowerCase();
+      const output = document.getElementById("output");
+      output.innerHTML = "";
+
+      if (categorie && data[categorie]) {
+        const afkortingen = data[categorie].filter(item =>
+          item.afkorting.toLowerCase().includes(zoekterm) || item.uitleg.toLowerCase().includes(zoekterm)
+        );
+        afkortingen.forEach(item => {
+          const div = document.createElement("div");
+          div.className = "bg-white text-black p-4 rounded shadow";
+          div.innerHTML = `<b>${item.afkorting}</b><br>${item.uitleg}`;
+          output.appendChild(div);
+        });
+      }
     }
 
     function zoekAfkorting() {
-      const q = document.getElementById("zoekbalk").value.toLowerCase();
-      const all = Object.values(data).flat();
-      const match = all.filter(x =>
-        x.afkorting.toLowerCase().includes(q) || x.uitleg.toLowerCase().includes(q)
-      );
-      document.getElementById("output").innerHTML = match.map(x =>
-        `<div class='bg-white text-black p-4 rounded shadow'><b>${x.afkorting}</b><br>${x.uitleg}</div>`
-      ).join('');
+      toonCategorie();
     }
   </script>
 
