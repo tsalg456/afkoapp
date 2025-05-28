@@ -17,41 +17,47 @@
     <div class="fixed top-4 right-4 bg-black bg-opacity-30 rounded-lg p-3 shadow-lg flex flex-col gap-2 z-50">
       <button onclick="toonFlashcards()" class="bg-blue-500 hover:bg-blue-700 px-4 py-2 rounded-lg font-bold">Flashcards</button>
       <button onclick="startQuiz()" class="bg-green-500 hover:bg-green-700 px-4 py-2 rounded-lg font-bold">Quiz</button>
-      <button onclick="showHighScores()" class="bg-yellow-500 hover:bg-yellow-600 px-4 py-2 rounded-lg font-bold">Highscores</button>
     </div><input id="zoekbalk" type="text" placeholder="Zoek afkorting..." oninput="zoekAfkorting()" class="w-full max-w-md mx-auto p-3 rounded-lg text-black mt-20">
 <div id="onderdelen-buttons" class="flex flex-wrap justify-center gap-2 my-4"></div>
 <div id="output" class="grid gap-4"></div>
-<div id="highscores" class="text-center mt-10"></div>
+<div id="quiz" class="hidden mt-10 text-center"></div>
 
   </div>  <script>
     const afkortingen = {
       Algemeen: [
         { afk: "AAT", uitleg: "Aan- en Afvoer Troepen" },
         { afk: "AMO", uitleg: "Algemene Militaire Opleiding" },
-        { afk: "CDS", uitleg: "Commandant der Strijdkrachten" }
+        { afk: "CDS", uitleg: "Commandant der Strijdkrachten" },
+        { afk: "OTC", uitleg: "Officiers Trainingscentrum" },
+        { afk: "KL", uitleg: "Koninklijke Landmacht" },
+        { afk: "KMAR", uitleg: "Koninklijke Marechaussee" }
       ],
       NAVO: [
         { afk: "NATO", uitleg: "North Atlantic Treaty Organization" },
-        { afk: "AWACS", uitleg: "Airborne Warning and Control System" }
+        { afk: "AWACS", uitleg: "Airborne Warning and Control System" },
+        { afk: "ROE", uitleg: "Rules of Engagement" },
+        { afk: "QRF", uitleg: "Quick Reaction Force" }
       ],
       Rangen: [
         { afk: "Sld", uitleg: "Soldaat" },
         { afk: "Kpl", uitleg: "Korporaal" },
-        { afk: "Sgt", uitleg: "Sergeant" }
+        { afk: "Sgt", uitleg: "Sergeant" },
+        { afk: "LTZ", uitleg: "Luitenant ter Zee" },
+        { afk: "Maj", uitleg: "Majoor" }
       ],
       Uitdrukkingen: [
-        { afk: "aanmelden", uitleg: "Gestandaardiseerde wijze waarop men zich meldt bij een meerdere" },
-        { afk: "achter de wacht", uitleg: "Straf: verzwaard of streng arrest, verblijf achter de wachtcommandant" },
-        { afk: "adderbataljon", uitleg: "Spotnaam voor 104 verkenningsbataljon" },
-        { afk: "AVA-koe", uitleg: "Veldartillerist (Afdeling VeldArtillerie)" },
         { afk: "apepak", uitleg: "Het gevechtspak" },
-        { afk: "apetuin", uitleg: "Hindernisbaan" }
+        { afk: "apetuin", uitleg: "Hindernisbaan" },
+        { afk: "AVA-koe", uitleg: "Veldartillerist" },
+        { afk: "adderbataljon", uitleg: "Spotnaam voor 104 verkenningsbataljon" },
+        { afk: "schoenpoets", uitleg: "Onnodige formaliteit of overijverige soldaat" }
       ],
       "Historisch (1941)": [
         { afk: "Afd", uitleg: "Afdeeling" },
         { afk: "Bt", uitleg: "Bataljon" },
         { afk: "Mot", uitleg: "Motorcompagnie" },
-        { afk: "Vbd", uitleg: "Verdedigingslinie" }
+        { afk: "Vbd", uitleg: "Verdedigingslinie" },
+        { afk: "R.I.", uitleg: "Regiment Infanterie" }
       ]
     };
 
@@ -79,7 +85,7 @@
       output.innerHTML = '';
       afkortingen[cat].forEach(item => {
         const card = document.createElement('div');
-        card.className = 'bg-white text-black p-4 rounded shadow';
+        card.className = 'bg-white text-black p-4 rounded shadow hover:scale-105 transition-transform';
         card.innerHTML = `<strong>${item.afk}</strong>: ${item.uitleg}`;
         output.appendChild(card);
       });
@@ -97,6 +103,51 @@
           output.appendChild(card);
         }
       });
+    }
+
+    function startQuiz() {
+      const quizDiv = document.getElementById('quiz');
+      const output = document.getElementById('output');
+      quizDiv.classList.remove('hidden');
+      output.innerHTML = '';
+
+      const flatList = Object.values(afkortingen).flat();
+      const vraag = flatList[Math.floor(Math.random() * flatList.length)];
+
+      const opties = shuffleArray([
+        vraag.uitleg,
+        ...flatList.filter(x => x.afk !== vraag.afk).slice(0, 3).map(x => x.uitleg)
+      ]).slice(0, 4);
+
+      quizDiv.innerHTML = `
+        <h2 class="text-2xl font-bold mb-4">Wat betekent: <span class="underline">${vraag.afk}</span>?</h2>
+        <div class="flex flex-col items-center gap-2">
+          ${opties.map(optie => `<button onclick="controleerAntwoord(this, '${vraag.uitleg}')" class="bg-white text-black px-4 py-2 rounded hover:bg-green-200">${optie}</button>`).join('')}
+        </div>
+        <div id="feedback" class="mt-4 font-bold"></div>
+      `;
+
+      setTimeout(() => {
+        if (!document.getElementById('feedback').textContent) {
+          document.getElementById('feedback').textContent = '⏰ Tijd voorbij!';
+          document.getElementById('feedback').className = 'text-yellow-300 font-bold';
+        }
+      }, 15000);
+    }
+
+    function controleerAntwoord(btn, correctAntwoord) {
+      const feedback = document.getElementById('feedback');
+      const isCorrect = btn.textContent.trim().toLowerCase() === correctAntwoord.toLowerCase();
+      feedback.textContent = isCorrect ? '✅ Goed gedaan!' : `❌ Incorrect. Antwoord was: ${correctAntwoord}`;
+      feedback.className = isCorrect ? 'text-green-400 font-bold' : 'text-red-400 font-bold';
+    }
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
     }
   </script></body>
 </html>
