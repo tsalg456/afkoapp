@@ -1,8 +1,7 @@
-<!DOCTYPE html>
-<html lang="nl">
+<!DOCTYPE html><html lang="nl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Afkoapp</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -10,99 +9,98 @@
     button { transition: all 0.3s ease-in-out; }
   </style>
 </head>
-<body class="bg-gradient-to-br from-indigo-900 via-fuchsia-700 to-amber-700 min-h-screen text-white">
-
-  <!-- Intro -->
-  <div id="intro" class="flex flex-col items-center justify-center min-h-screen">
+<body class="bg-gradient-to-br from-indigo-900 via-fuchsia-700 to-amber-700 min-h-screen text-white">  <!-- Startpagina -->  <div id="intro" class="flex flex-col items-center justify-center min-h-screen">
     <h1 class="text-5xl font-bold mb-8 animate-bounce">Welkom bij Afkoapp</h1>
     <button onclick="startApp()" class="px-6 py-3 bg-yellow-500 hover:bg-yellow-600 rounded-full text-xl font-bold shadow-lg">
       Ik ben de baas
     </button>
-  </div>
+  </div>  <!-- App content -->  <div id="mainApp" class="hidden p-4">
+    <div class="fixed top-4 right-4 z-50">
+      <select onchange="filterCategorie(this.value)" class="bg-white text-black p-2 rounded-lg shadow">
+        <option value="">-- Kies categorie --</option>
+        <option value="landmacht">Landmacht</option>
+        <option value="luchtmacht">Luchtmacht</option>
+        <option value="marine">Marine</option>
+        <option value="marechaussee">Marechaussee</option>
+        <option value="historisch">Historisch</option>
+        <option value="algemeen">Algemeen</option>
+        <option value="vakken">Vakken</option>
+        <option value="onderdelen">Onderdelen</option>
+        <option value="afkortingen">Alle Afkortingen</option>
+      </select>
+    </div><input id="zoekbalk" type="text" placeholder="Zoek afkorting..." oninput="zoekAfkorting()" class="w-full max-w-md mx-auto p-3 rounded-lg text-black mt-20">
+<div id="output" class="grid gap-4 mt-6"></div>
 
-  <!-- Main App -->
-  <div id="mainApp" class="hidden p-4">
-    <div class="fixed top-4 right-4 bg-black bg-opacity-30 rounded-lg p-3 shadow-lg flex flex-col gap-2 z-50">
-      <button onclick="toonFlashcards()" class="bg-blue-500 hover:bg-blue-700 px-4 py-2 rounded-lg font-bold">Flashcards</button>
-      <button onclick="startQuiz()" class="bg-green-500 hover:bg-green-700 px-4 py-2 rounded-lg font-bold">Quiz</button>
-    </div>
-
-    <input id="zoekbalk" type="text" placeholder="Zoek afkorting..." oninput="zoekAfkorting()" 
-      class="w-full max-w-md mx-auto p-3 rounded-lg text-black mt-20" />
-
-    <div id="onderdelen-buttons" class="flex flex-wrap justify-center gap-2 my-4"></div>
-    <div id="output" class="grid gap-4"></div>
-    <div id="quiz" class="hidden mt-10 text-center"></div>
-  </div>
-
-  <!-- Script -->
-  <script>
-    const rangen = {
+  </div>  <script>
+    const data = {
+      algemeen: [
+        { afkorting: "Vupo", uitleg: "Vooruitgeschoven Post" },
+        { afkorting: "Afst", uitleg: "Afstand" }
+      ],
+      vakken: [
+        { afkorting: "1pel", uitleg: "1e Peloton" },
+        { afkorting: "2pel", uitleg: "2e Peloton" },
+        { afkorting: "3pel", uitleg: "3e Peloton" },
+        { afkorting: "4pek", uitleg: "4e Peloton (Kennelijk verkeerd gespeld)" },
+        { afkorting: "5pel", uitleg: "5e Peloton" }
+      ],
+      onderdelen: [
+        { afkorting: "A", uitleg: "Onderdeel A" },
+        { afkorting: "B", uitleg: "Onderdeel B" },
+        { afkorting: "C", uitleg: "Onderdeel C" },
+        { afkorting: "D", uitleg: "Onderdeel D" },
+        { afkorting: "E", uitleg: "Onderdeel E" },
+        { afkorting: "F", uitleg: "Onderdeel F" }
+      ],
       landmacht: [
-        { rang: "Generaal", afkorting: "GEN", aanspreektitel: "Generaal", afbeelding: "gen.png" },
-        { rang: "Luitenant-generaal", afkorting: "LGEN", aanspreektitel: "Generaal", afbeelding: "ltgen.png" },
-        { rang: "Generaal-majoor", afkorting: "GM", aanspreektitel: "Generaal", afbeelding: "gmaj.png" },
-        { rang: "Brigadegeneraal", afkorting: "BRIGGEN", aanspreektitel: "Generaal", afbeelding: "briggen.png" },
-        { rang: "Kolonel", afkorting: "KOL", aanspreektitel: "Kolonel", afbeelding: "kol.png" },
-        { rang: "Luitenant-kolonel", afkorting: "LTKOL", aanspreektitel: "Overste", afbeelding: "ltk.png" },
-        { rang: "Majoor", afkorting: "MAJ", aanspreektitel: "Majoor", afbeelding: "maj.png" },
-        { rang: "Kapitein", afkorting: "KAP", aanspreektitel: "Kapitein", afbeelding: "kap.png" },
-        { rang: "Eerste Luitenant", afkorting: "1LT", aanspreektitel: "Luitenant", afbeelding: "1lt.png" },
-        { rang: "Tweede Luitenant", afkorting: "2LT", aanspreektitel: "Luitenant", afbeelding: "2lt.png" },
-        { rang: "Vaandrig", afkorting: "VAANDRIG", aanspreektitel: "Vaandrig", afbeelding: "vaandrig.png" }
+        { afkorting: "GEN", uitleg: "Generaal" },
+        { afkorting: "LGEN", uitleg: "Luitenant-generaal" }
+      ],
+      luchtmacht: [
+        { afkorting: "COMM", uitleg: "Commodore" }
       ],
       marine: [
-        { rang: "Luitenant-admiraal", afkorting: "LADM", aanspreektitel: "Admiraal", afbeelding: "ladm.png" },
-        { rang: "Vice-admiraal", afkorting: "VADM", aanspreektitel: "Admiraal", afbeelding: "vadm.png" },
-        { rang: "Schout-bij-nacht", afkorting: "SBNT", aanspreektitel: "Schout", afbeelding: "sbnt.png" },
-        { rang: "Commandeur", afkorting: "CDR", aanspreektitel: "Commandeur", afbeelding: "cdr.png" },
-        { rang: "Kapitein-ter-zee", afkorting: "KTZ", aanspreektitel: "Kapitein", afbeelding: "ktz.png" }
+        { afkorting: "LADM", uitleg: "Luitenant-admiraal" }
       ],
       marechaussee: [
-        { rang: "Opperwachtmeester", afkorting: "OPWM", aanspreektitel: "Wachtmeester", afbeelding: "opwm.png" },
-        { rang: "Wachtmeester der 1e klasse", afkorting: "WM1", aanspreektitel: "Wachtmeester", afbeelding: "wm1.png" },
-        { rang: "Wachtmeester", afkorting: "WM", aanspreektitel: "Wachtmeester", afbeelding: "wm.png" },
-        { rang: "Marechaussee der 1e klasse", afkorting: "MCH1", aanspreektitel: "Marechaussee", afbeelding: "mch1.png" }
+        { afkorting: "WM", uitleg: "Wachtmeester" }
       ],
       historisch: [
-        { rang: "Veldmaarschalk", afkorting: "VM", periode: "tot 1914", afbeelding: "vm.png" },
-        { rang: "Onderluitenant", afkorting: "OLT", periode: "tot 1940", afbeelding: "olt.png" }
+        { afkorting: "VM", uitleg: "Veldmaarschalk" }
       ]
     };
 
     function startApp() {
       document.getElementById('intro').classList.add('hidden');
       document.getElementById('mainApp').classList.remove('hidden');
+      toonAfkortingen('algemeen');
     }
 
-    function toonFlashcards() {
-      alert("Flashcards coming soon!");
+    function filterCategorie(categorie) {
+      if (categorie && data[categorie]) {
+        toonAfkortingen(categorie);
+      } else {
+        document.getElementById("output").innerHTML = "";
+      }
     }
 
-    function startQuiz() {
-      alert("Quiz coming soon!");
+    function toonAfkortingen(categorie) {
+      const lijst = data[categorie] || [];
+      const html = lijst.map(x => `<div class='p-4 bg-white bg-opacity-10 rounded-xl shadow-lg'><strong>${x.afkorting}</strong>: ${x.uitleg}</div>`).join("");
+      document.getElementById("output").innerHTML = html;
     }
 
     function zoekAfkorting() {
-      const query = document.getElementById("zoekbalk").value.toLowerCase();
-      const result = [];
-      for (const [cat, items] of Object.entries(rangen)) {
-        for (const item of items) {
-          if (
-            item.afkorting.toLowerCase().includes(query) ||
-            item.rang.toLowerCase().includes(query)
-          ) {
-            result.push(
-              `<div class='p-4 bg-white bg-opacity-10 rounded-xl shadow-lg'>
-                <strong>${item.afkorting}</strong>: ${item.rang} (${item.aanspreektitel})
-              </div>`
-            );
+      const q = document.getElementById("zoekbalk").value.toLowerCase();
+      let res = [];
+      Object.values(data).forEach(lijst => {
+        lijst.forEach(item => {
+          if (item.afkorting.toLowerCase().includes(q) || item.uitleg.toLowerCase().includes(q)) {
+            res.push(`<div class='p-4 bg-white bg-opacity-10 rounded-xl shadow-lg'><strong>${item.afkorting}</strong>: ${item.uitleg}</div>`);
           }
-        }
-      }
-      document.getElementById("output").innerHTML = result.join("");
+        });
+      });
+      document.getElementById("output").innerHTML = res.join("");
     }
-  </script>
-
-</body>
+  </script></body>
 </html>
