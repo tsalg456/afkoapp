@@ -1,50 +1,50 @@
 <!DOCTYPE html><html lang="nl">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Afkoapp</title>
+  <title>Afkoapp Leerplatform</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     html { scroll-behavior: smooth; }
     button { transition: all 0.3s ease-in-out; }
+    select, input { border: none; outline: none; }
   </style>
 </head>
-<body class="bg-gradient-to-br from-indigo-900 via-fuchsia-700 to-amber-700 min-h-screen text-white">  <!-- Startpagina -->  <div id="intro" class="flex flex-col items-center justify-center min-h-screen">
-    <h1 class="text-5xl font-bold mb-8 animate-bounce">Welkom bij Afkoapp</h1>
-    <button onclick="startApp()" class="px-6 py-3 bg-yellow-500 hover:bg-yellow-600 rounded-full text-xl font-bold shadow-lg">
+<body class="bg-gradient-to-br from-blue-900 via-purple-800 to-rose-700 min-h-screen text-white font-sans">
+  <!-- Startpagina -->
+  <div id="intro" class="flex flex-col items-center justify-center min-h-screen text-center px-4">
+    <h1 class="text-6xl font-bold mb-6">Afkoapp</h1>
+    <p class="mb-6 text-lg">Leer militaire afkortingen eenvoudig via overzichtelijke categorieën</p>
+    <button onclick="startApp()" class="px-6 py-3 bg-yellow-400 hover:bg-yellow-500 rounded-full text-xl font-semibold shadow-md">
       Ik ben de baas
     </button>
-  </div>  <!-- App content -->  <div id="mainApp" class="hidden p-4">
-    <div class="fixed top-4 right-4 z-50">
-      <select onchange="filterCategorie(this.value)" class="bg-white text-black p-2 rounded-lg shadow">
-        <option value="">-- Kies categorie --</option>
+  </div>  <!-- App content -->  <div id="mainApp" class="hidden px-4 py-6">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-2xl font-bold">Zoek of selecteer een categorie</h2>
+      <select onchange="filterCategorie(this.value)" class="bg-white text-black p-2 rounded-lg">
+        <option value="">-- Categorie --</option>
+        <option value="afkortingen">Afkortingen (A-Z)</option>
         <option value="landmacht">Landmacht</option>
         <option value="luchtmacht">Luchtmacht</option>
         <option value="marine">Marine</option>
         <option value="marechaussee">Marechaussee</option>
         <option value="historisch">Historisch</option>
-        <option value="algemeen">Algemeen</option>
         <option value="vakken">Vakken</option>
         <option value="onderdelen">Onderdelen</option>
-        <option value="afkortingen">Alle Afkortingen</option>
       </select>
-    </div><input id="zoekbalk" type="text" placeholder="Zoek afkorting..." oninput="zoekAfkorting()" class="w-full max-w-md mx-auto p-3 rounded-lg text-black mt-20">
-<div id="output" class="grid gap-4 mt-6"></div>
+    </div><input id="zoekbalk" type="text" placeholder="Zoek een afkorting..." oninput="zoekAfkorting()" class="w-full max-w-xl p-3 mb-6 rounded-lg text-black">
+<div id="output" class="grid gap-4"></div>
 
   </div>  <script>
     const data = {
-      algemeen: [
+      afkortingen: [
+        { afkorting: "Afst", uitleg: "Afstand" },
         { afkorting: "Vupo", uitleg: "Vooruitgeschoven Post" },
-        { afkorting: "Afst", uitleg: "Afstand" }
-      ],
-      vakken: [
         { afkorting: "1pel", uitleg: "1e Peloton" },
         { afkorting: "2pel", uitleg: "2e Peloton" },
         { afkorting: "3pel", uitleg: "3e Peloton" },
-        { afkorting: "4pek", uitleg: "4e Peloton (Kennelijk verkeerd gespeld)" },
-        { afkorting: "5pel", uitleg: "5e Peloton" }
-      ],
-      onderdelen: [
+        { afkorting: "4pel", uitleg: "4e Peloton" },
+        { afkorting: "5pel", uitleg: "5e Peloton" },
         { afkorting: "A", uitleg: "Onderdeel A" },
         { afkorting: "B", uitleg: "Onderdeel B" },
         { afkorting: "C", uitleg: "Onderdeel C" },
@@ -67,40 +67,42 @@
       ],
       historisch: [
         { afkorting: "VM", uitleg: "Veldmaarschalk" }
+      ],
+      vakken: [
+        { afkorting: "Vak A", uitleg: "Opleidingsonderdeel A" }
+      ],
+      onderdelen: [
+        { afkorting: "Peloton", uitleg: "Militaire eenheid van ca. 30 man" }
       ]
     };
 
     function startApp() {
       document.getElementById('intro').classList.add('hidden');
       document.getElementById('mainApp').classList.remove('hidden');
-      toonAfkortingen('algemeen');
+      toonAfkortingen('afkortingen');
     }
 
-    function filterCategorie(categorie) {
-      if (categorie && data[categorie]) {
-        toonAfkortingen(categorie);
-      } else {
-        document.getElementById("output").innerHTML = "";
-      }
+    function filterCategorie(cat) {
+      toonAfkortingen(cat);
     }
 
-    function toonAfkortingen(categorie) {
-      const lijst = data[categorie] || [];
-      const html = lijst.map(x => `<div class='p-4 bg-white bg-opacity-10 rounded-xl shadow-lg'><strong>${x.afkorting}</strong>: ${x.uitleg}</div>`).join("");
-      document.getElementById("output").innerHTML = html;
+    function toonAfkortingen(cat) {
+      const lijst = data[cat] || [];
+      const gesorteerd = lijst.sort((a, b) => a.afkorting.localeCompare(b.afkorting));
+      document.getElementById("output").innerHTML = gesorteerd
+        .map(x => `<div class='p-4 bg-white bg-opacity-10 rounded-xl shadow'><strong>${x.afkorting}</strong>: ${x.uitleg}</div>`) 
+        .join("");
     }
 
     function zoekAfkorting() {
-      const q = document.getElementById("zoekbalk").value.toLowerCase();
-      let res = [];
-      Object.values(data).forEach(lijst => {
-        lijst.forEach(item => {
-          if (item.afkorting.toLowerCase().includes(q) || item.uitleg.toLowerCase().includes(q)) {
-            res.push(`<div class='p-4 bg-white bg-opacity-10 rounded-xl shadow-lg'><strong>${item.afkorting}</strong>: ${item.uitleg}</div>`);
-          }
-        });
+      const query = document.getElementById("zoekbalk").value.toLowerCase();
+      let resultaten = [];
+      Object.values(data).flat().forEach(x => {
+        if (x.afkorting.toLowerCase().includes(query) || x.uitleg.toLowerCase().includes(query)) {
+          resultaten.push(`<div class='p-4 bg-white bg-opacity-10 rounded-xl shadow'><strong>${x.afkorting}</strong>: ${x.uitleg}</div>`);
+        }
       });
-      document.getElementById("output").innerHTML = res.join("");
+      document.getElementById("output").innerHTML = resultaten.join("");
     }
   </script></body>
 </html>
