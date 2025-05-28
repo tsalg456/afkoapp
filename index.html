@@ -2,67 +2,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Afkoapp</title>
+  <title>Afkoapp Game Style</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f4f4f4;
-    }
-    h1, h2 {
-      text-align: center;
-    }
-    .controls, .buttons {
-      text-align: center;
-      margin: 10px;
+    html {
+      scroll-behavior: smooth;
     }
     button {
-      margin: 5px;
-      padding: 10px 20px;
-      cursor: pointer;
-      border: none;
-      border-radius: 5px;
-      background-color: #4CAF50;
-      color: white;
-      font-size: 16px;
+      transition: all 0.3s ease-in-out;
     }
-    button:hover {
-      background-color: #45a049;
-    }
-    .card {
-      background: white;
-      max-width: 500px;
-      margin: 10px auto;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .search-input {
-      width: 80%;
-      padding: 10px;
-      margin: 10px auto;
-      display: block;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    #mainApp { display: none; }
   </style>
 </head>
-<body>
-  <div id="intro">
-    <h1>Welkom bij Afkoapp</h1>
-    <div style="text-align:center; margin: 30px;">
-      <button onclick="startApp()">Ik ben de baas</button>
+<body class="bg-gradient-to-br from-indigo-900 via-fuchsia-700 to-amber-700 min-h-screen text-white">
+  <div id="intro" class="flex flex-col items-center justify-center min-h-screen">
+    <h1 class="text-5xl font-bold mb-8 animate-bounce">Welkom bij Afkoapp</h1>
+    <button onclick="startApp()" class="px-6 py-3 bg-yellow-500 hover:bg-yellow-600 rounded-full text-xl font-bold shadow-lg transition-all">Ik ben de baas</button>
+  </div>  <div id="mainApp" class="hidden p-4">
+    <input id="zoekbalk" type="text" placeholder="Zoek afkorting..." oninput="zoekAfkorting()" class="w-full max-w-md mx-auto p-3 rounded-lg text-black">
+    <div id="onderdelen-buttons" class="flex flex-wrap justify-center gap-2 my-4"></div>
+    <div class="flex justify-center gap-4 mb-4">
+      <button onclick="toonFlashcards()" class="bg-blue-500 hover:bg-blue-700 px-4 py-2 rounded-lg font-bold">Flashcards</button>
+      <button onclick="startQuiz()" class="bg-green-500 hover:bg-green-700 px-4 py-2 rounded-lg font-bold">Quiz</button>
     </div>
-  </div>  <div id="mainApp">
-    <input class="search-input" id="zoekbalk" type="text" placeholder="Zoek afkorting..." oninput="zoekAfkorting()">
-    <div class="controls" id="onderdelen-buttons"></div>
-    <div class="buttons">
-      <button onclick="toonFlashcards()">Flashcards</button>
-      <button onclick="startQuiz()">Quiz</button>
-    </div>
-    <div id="output"></div>
+    <div id="output" class="grid gap-4"></div>
+    <div id="highscores" class="text-center mt-10"></div>
   </div>  <script>
     const afkortingen = {
       "Algemeen": [
@@ -100,10 +63,11 @@
     let shuffledQuestions = [];
 
     function startApp() {
-      document.getElementById('intro').style.display = 'none';
-      document.getElementById('mainApp').style.display = 'block';
+      document.getElementById('intro').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
       initOnderdeelKnoppen();
       selectOnderdeel(current);
+      showHighScores();
     }
 
     function initOnderdeelKnoppen() {
@@ -112,6 +76,7 @@
       for (let onderdeel in afkortingen) {
         const btn = document.createElement('button');
         btn.textContent = onderdeel;
+        btn.className = 'bg-purple-600 hover:bg-purple-800 px-4 py-2 rounded-lg font-semibold';
         btn.onclick = () => selectOnderdeel(onderdeel);
         div.appendChild(btn);
       }
@@ -127,7 +92,7 @@
       div.innerHTML = '';
       afkortingen[current].forEach(item => {
         const card = document.createElement('div');
-        card.className = 'card';
+        card.className = 'bg-white text-black p-4 rounded-lg shadow-xl text-center';
         card.innerHTML = `<strong>${item.afk}</strong><br><small>${item.uitleg}</small>`;
         div.appendChild(card);
       });
@@ -142,7 +107,7 @@
           item.afk.toLowerCase().includes(query) || item.uitleg.toLowerCase().includes(query)
         ).forEach(item => {
           const card = document.createElement('div');
-          card.className = 'card';
+          card.className = 'bg-white text-black p-4 rounded-lg shadow-xl text-center';
           card.innerHTML = `<strong>${item.afk}</strong><br><small>${item.uitleg}</small>`;
           div.appendChild(card);
         });
@@ -159,16 +124,16 @@
     function showQuiz() {
       const vragen = shuffledQuestions;
       if (quizIndex >= vragen.length) {
-        document.getElementById('output').innerHTML = `<h2>Score: ${score} / ${vragen.length}</h2>`;
+        saveHighScore(score);
+        document.getElementById('output').innerHTML = `<div class='text-center'><h2 class='text-3xl'>Score: ${score} / ${vragen.length}</h2></div>`;
+        showHighScores();
         return;
       }
-
       const vraag = vragen[quizIndex];
       const opties = shuffle([vraag.uitleg, ...genereerAfleiders(vraag.uitleg)]);
-
-      let html = `<div class='card'><h3>${vraag.afk}</h3>`;
+      let html = `<div class='bg-white text-black p-4 rounded-xl shadow-xl text-center'><h3 class='text-2xl mb-4'>${vraag.afk}</h3>`;
       opties.forEach(optie => {
-        html += `<button onclick="checkAntwoordKeuze('${vraag.uitleg}', '${optie}')">${optie}</button><br>`;
+        html += `<button onclick="checkAntwoordKeuze('${vraag.uitleg}', '${optie}')" class="block w-full bg-gray-200 hover:bg-gray-300 text-black font-semibold py-2 px-4 my-2 rounded-lg">${optie}</button>`;
       });
       html += '</div>';
       document.getElementById('output').innerHTML = html;
@@ -177,9 +142,9 @@
     function checkAntwoordKeuze(juiste, gekozen) {
       if (gekozen === juiste) {
         score++;
-        alert('Goed zo!');
+        alert('✅ Goed zo!');
       } else {
-        alert(`Fout. Antwoord: ${juiste}`);
+        alert(`❌ Fout. Antwoord: ${juiste}`);
       }
       quizIndex++;
       showQuiz();
@@ -197,6 +162,20 @@
       const alleUitleg = Object.values(afkortingen).flat().map(item => item.uitleg);
       const unieke = alleUitleg.filter(u => u !== juiste);
       return shuffle(unieke).slice(0, 3);
+    }
+
+    function saveHighScore(score) {
+      let scores = JSON.parse(localStorage.getItem("afkoapp-scores") || "[]");
+      scores.push(score);
+      scores.sort((a, b) => b - a);
+      scores = scores.slice(0, 5);
+      localStorage.setItem("afkoapp-scores", JSON.stringify(scores));
+    }
+
+    function showHighScores() {
+      const scores = JSON.parse(localStorage.getItem("afkoapp-scores") || "[]");
+      const div = document.getElementById("highscores");
+      div.innerHTML = `<h2 class='text-2xl font-bold mb-2'>Top Scores</h2><ul class='list-none'>${scores.map(s => `<li class='text-lg'>⭐ ${s}</li>`).join('')}</ul>`;
     }
   </script></body>
 </html>
