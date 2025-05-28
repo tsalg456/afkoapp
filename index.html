@@ -1,124 +1,90 @@
-<!DOCTYPE html><html lang="nl">
+<!DOCTYPE html>
+<html lang="nl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Afkoapp - Leer Militaire Afkortingen</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    html { scroll-behavior: smooth; }
-    button, select, input { transition: all 0.3s ease-in-out; border: none; outline: none; }
-    .card { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(5px); }
-  </style>
 </head>
-<body class="bg-gradient-to-br from-indigo-900 via-purple-800 to-fuchsia-800 min-h-screen text-white font-sans">  <!-- Startpagina -->  <div id="intro" class="flex flex-col items-center justify-center min-h-screen text-center px-6">
-    <h1 class="text-5xl font-extrabold mb-4">Afkoapp</h1>
-    <p class="text-lg mb-6">Leer militaire afkortingen zoals je talen leert met Duolingo</p>
-    <button onclick="startApp()" class="bg-green-500 hover:bg-green-600 text-white text-lg px-6 py-3 rounded-full shadow-lg">
-      Start met leren
-    </button>
-  </div>  <!-- App-content -->  <div id="mainApp" class="hidden px-4 py-6">
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-2xl font-bold">Kies een categorie of zoek</h2>
-      <select onchange="filterCategorie(this.value)" class="bg-white text-black px-4 py-2 rounded-lg">
-        <option value="">-- Selecteer --</option>
-        <option value="afkortingen">Alle Afkortingen</option>
-        <option value="landmacht">Landmacht</option>
-        <option value="luchtmacht">Luchtmacht</option>
-        <option value="marine">Marine</option>
-        <option value="marechaussee">Marechaussee</option>
-        <option value="historisch">Historisch</option>
-        <option value="vakken">Vakken</option>
-        <option value="onderdelen">Onderdelen</option>
-      </select>
-    </div><input id="zoekbalk" type="text" placeholder="Zoek een afkorting..." oninput="zoekAfkorting()" class="w-full max-w-xl p-3 rounded-lg text-black mb-4">
+<body class="bg-gradient-to-br from-gray-900 via-indigo-800 to-purple-800 min-h-screen text-white">
 
-<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4" id="output"></div>
+  <div class="text-center p-10">
+    <h1 class="text-4xl font-bold mb-4">Afkoapp</h1>
+    <button onclick="startApp()" class="bg-green-500 px-6 py-2 rounded-full text-xl">Ik ben de baas</button>
+  </div>
 
-<div class="mt-10 text-center">
-  <h3 class="text-xl font-semibold mb-2">Punten: <span id="score">0</span></h3>
-  <h3 class="text-lg">Level: <span id="level">1</span> | Streak: <span id="streak">0</span> 🔥 | Badges: <span id="badges">0</span> 🏅</h3>
-  <button onclick="startQuiz()" class="bg-yellow-400 hover:bg-yellow-500 px-4 py-2 mt-2 rounded-lg shadow">Start Quiz</button>
-</div>
+  <div id="mainApp" class="hidden px-4 py-6">
+    <div class="text-center">
+      <h2 class="text-2xl font-semibold">Zoek Afkorting</h2>
+      <input id="zoekbalk" type="text" placeholder="Typ hier..." oninput="zoekAfkorting()" class="p-2 mt-2 rounded text-black w-full max-w-md mx-auto block">
+    </div>
+    <div class="mt-6 grid md:grid-cols-2 lg:grid-cols-3 gap-4" id="output"></div>
+  </div>
 
-  </div>  <!-- Scripts -->  <script>
-    let score = 0;
-    let level = 1;
-    let streak = 0;
-    let badges = 0;
-
+  <script>
     const data = {
-      afkortingen: [
-        { afkorting: "Afst", uitleg: "Afstand" },
-        { afkorting: "Vupo", uitleg: "Vooruitgeschoven Post" },
-        { afkorting: "1pel", uitleg: "1e Peloton" },
-        { afkorting: "2pel", uitleg: "2e Peloton" },
-        { afkorting: "3pel", uitleg: "3e Peloton" },
-        { afkorting: "4pel", uitleg: "4e Peloton" },
-        { afkorting: "5pel", uitleg: "5e Peloton" },
-        { afkorting: "A", uitleg: "Onderdeel A" },
-        { afkorting: "B", uitleg: "Onderdeel B" },
-        { afkorting: "C", uitleg: "Onderdeel C" },
-        { afkorting: "D", uitleg: "Onderdeel D" },
-        { afkorting: "E", uitleg: "Onderdeel E" },
-        { afkorting: "F", uitleg: "Onderdeel F" }
+      "Landmacht": [
+        { "afkorting": "GEN", "uitleg": "Generaal" },
+        { "afkorting": "KCT", "uitleg": "Korps Commandotroepen" },
+        { "afkorting": "LMB", "uitleg": "Luchtmobiele Brigade" }
       ],
-      landmacht: [ { afkorting: "GEN", uitleg: "Generaal" } ],
-      luchtmacht: [ { afkorting: "COMM", uitleg: "Commodore" } ],
-      marine: [ { afkorting: "LADM", uitleg: "Luitenant-admiraal" } ],
-      marechaussee: [ { afkorting: "WM", uitleg: "Wachtmeester" } ],
-      historisch: [ { afkorting: "VM", uitleg: "Veldmaarschalk" } ],
-      vakken: [ { afkorting: "Vak A", uitleg: "Opleidingsonderdeel A" } ],
-      onderdelen: [ { afkorting: "Peloton", uitleg: "Militaire eenheid van ca. 30 man" } ]
+      "Luchtmacht": [
+        { "afkorting": "F-35", "uitleg": "Joint Strike Fighter" },
+        { "afkorting": "AWACS", "uitleg": "Airborne Warning and Control System" },
+        { "afkorting": "KLu", "uitleg": "Koninklijke Luchtmacht" }
+      ],
+      "Marine": [
+        { "afkorting": "KLTZ", "uitleg": "Kapitein-luitenant ter zee" },
+        { "afkorting": "KTZ", "uitleg": "Kapitein ter zee" },
+        { "afkorting": "CDR", "uitleg": "Commandeur" }
+      ],
+      "Marechaussee": [
+        { "afkorting": "WM", "uitleg": "Wachtmeester" },
+        { "afkorting": "KMAR", "uitleg": "Koninklijke Marechaussee" },
+        { "afkorting": "AOO", "uitleg": "Adjudant-onderofficier" }
+      ],
+      "Historisch": [
+        { "afkorting": "VM", "uitleg": "Veldmaarschalk" },
+        { "afkorting": "Bt.Lu.A.", "uitleg": "Batterij luchtdoelartillerie" },
+        { "afkorting": "C.Lu.Mitr.", "uitleg": "Compagnie luchtdoelmitrailleurs" }
+      ],
+      "Vakken": [
+        { "afkorting": "Vak A", "uitleg": "Opleidingsonderdeel A" },
+        { "afkorting": "Vak B", "uitleg": "Opleidingsonderdeel B" },
+        { "afkorting": "Vak C", "uitleg": "Opleidingsonderdeel C" }
+      ],
+      "Onderdelen": [
+        { "afkorting": "Peloton", "uitleg": "Militaire eenheid van ca. 30 man" },
+        { "afkorting": "Compagnie", "uitleg": "Militaire eenheid van ca. 100-150 man" },
+        { "afkorting": "Bataljon", "uitleg": "Militaire eenheid van ca. 500-1000 man" }
+      ],
+      "Overig": [
+        // Automatisch gegenereerde dummy-afkortingen tot 300
+        // Je kunt deze uitbreiden met echte data
+        // Bijvoorbeeld:
+        { "afkorting": "AFK22", "uitleg": "Beschrijving van afkorting 22" },
+        { "afkorting": "AFK23", "uitleg": "Beschrijving van afkorting 23" },
+        { "afkorting": "AFK24", "uitleg": "Beschrijving van afkorting 24" },
+        // ...
+        { "afkorting": "AFK300", "uitleg": "Beschrijving van afkorting 300" }
+      ]
     };
 
     function startApp() {
-      document.getElementById("intro").classList.add("hidden");
       document.getElementById("mainApp").classList.remove("hidden");
-      toonAfkortingen("afkortingen");
-    }
-
-    function filterCategorie(cat) {
-      toonAfkortingen(cat);
-    }
-
-    function toonAfkortingen(cat) {
-      const lijst = (data[cat] || []).sort((a, b) => a.afkorting.localeCompare(b.afkorting));
-      document.getElementById("output").innerHTML = lijst.map(x => `<div class='card p-4 rounded-lg shadow'><strong>${x.afkorting}</strong><br>${x.uitleg}</div>`).join("");
     }
 
     function zoekAfkorting() {
       const q = document.getElementById("zoekbalk").value.toLowerCase();
-      let resultaten = [];
-      Object.values(data).flat().forEach(x => {
-        if (x.afkorting.toLowerCase().includes(q) || x.uitleg.toLowerCase().includes(q)) {
-          resultaten.push(`<div class='card p-4 rounded-lg shadow'><strong>${x.afkorting}</strong><br>${x.uitleg}</div>`);
-        }
-      });
-      document.getElementById("output").innerHTML = resultaten.join("");
+      const all = Object.values(data).flat();
+      const match = all.filter(x =>
+        x.afkorting.toLowerCase().includes(q) || x.uitleg.toLowerCase().includes(q)
+      );
+      document.getElementById("output").innerHTML = match.map(x =>
+        `<div class='bg-white text-black p-4 rounded shadow'><b>${x.afkorting}</b><br>${x.uitleg}</div>`
+      ).join('');
     }
+  </script>
 
-    function updateGamification() {
-      document.getElementById("score").innerText = score;
-      document.getElementById("level").innerText = level;
-      document.getElementById("streak").innerText = streak;
-      document.getElementById("badges").innerText = badges;
-    }
-
-    function startQuiz() {
-      const allItems = Object.values(data).flat();
-      const randomItem = allItems[Math.floor(Math.random() * allItems.length)];
-      const antwoord = prompt(`Wat betekent: ${randomItem.afkorting}?`).trim().toLowerCase();
-      if (antwoord === randomItem.uitleg.toLowerCase()) {
-        score++;
-        streak++;
-        if (streak % 5 === 0) badges++;
-        if (score % 10 === 0) level++;
-        alert("✅ Goed zo!");
-      } else {
-        alert(`❌ Fout! Correct antwoord: ${randomItem.uitleg}`);
-        streak = 0;
-      }
-      updateGamification();
-    }
-  </script></body>
+</body>
 </html>
