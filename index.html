@@ -11,6 +11,8 @@
   <div class="text-center p-10">
     <h1 class="text-4xl font-bold mb-4">Afkoapp</h1>
     <button onclick="startApp()" class="bg-green-500 px-6 py-2 rounded-full text-xl">Ik ben de baas</button>
+    <button onclick="startQuiz()" class="bg-yellow-400 text-black font-semibold px-6 py-2 rounded-full text-xl ml-4">Start de Quiz</button>
+    <div id="scoreInfo" class="mt-4 text-lg"></div>
   </div>
 
   <div id="mainApp" class="hidden px-4 py-6">
@@ -26,6 +28,15 @@
     <div class="mt-6 grid md:grid-cols-2 lg:grid-cols-3 gap-4" id="output"></div>
   </div>
 
+  <div id="quizApp" class="hidden px-6 py-6">
+    <h2 class="text-2xl font-bold text-center mb-4">Quiz Tijd!</h2>
+    <div class="text-center mb-4" id="quizVraag"></div>
+    <div id="quizOpties" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-lg mx-auto"></div>
+    <div class="text-center mt-6">
+      <button onclick="stopQuiz()" class="mt-4 bg-red-500 px-4 py-2 rounded-full text-white">Stop Quiz</button>
+    </div>
+  </div>
+
   <script>
     const data = {
       "Landmacht": [
@@ -38,46 +49,23 @@
         { afkorting: "AWACS", uitleg: "Airborne Warning and Control System" },
         { afkorting: "KLu", uitleg: "Koninklijke Luchtmacht" }
       ],
-      "Marine": [
-        { afkorting: "KLTZ", uitleg: "Kapitein-luitenant ter zee" },
-        { afkorting: "KTZ", uitleg: "Kapitein ter zee" },
-        { afkorting: "CDR", uitleg: "Commandeur" }
-      ],
-      "Marechaussee": [
-        { afkorting: "WM", uitleg: "Wachtmeester" },
-        { afkorting: "KMAR", uitleg: "Koninklijke Marechaussee" },
-        { afkorting: "AOO", uitleg: "Adjudant-onderofficier" }
-      ],
-      "Historisch": [
-        { afkorting: "VM", uitleg: "Veldmaarschalk" },
-        { afkorting: "Bt.Lu.A.", uitleg: "Batterij luchtdoelartillerie" },
-        { afkorting: "C.Lu.Mitr.", uitleg: "Compagnie luchtdoelmitrailleurs" }
-      ],
-      "Vakken": [
-        { afkorting: "Vak A", uitleg: "Opleidingsonderdeel A" },
-        { afkorting: "Vak B", uitleg: "Opleidingsonderdeel B" },
-        { afkorting: "Vak C", uitleg: "Opleidingsonderdeel C" }
-      ],
-      "Onderdelen": [
-        { afkorting: "Peloton", uitleg: "Militaire eenheid van ca. 30 man" },
-        { afkorting: "Compagnie", uitleg: "Militaire eenheid van ca. 100-150 man" },
-        { afkorting: "Bataljon", uitleg: "Militaire eenheid van ca. 500-1000 man" }
-      ],
-      "Overig": [
-        // Automatisch gegenereerde dummy-afkortingen tot 300
-        // Je kunt deze uitbreiden met echte data
-        // Bijvoorbeeld:
-        { afkorting: "AFK22", uitleg: "Beschrijving van afkorting 22" },
-        { afkorting: "AFK23", uitleg: "Beschrijving van afkorting 23" },
-        { afkorting: "AFK24", uitleg: "Beschrijving van afkorting 24" },
-        // ...
-        { afkorting: "AFK300", uitleg: "Beschrijving van afkorting 300" }
-      ]
+      "Overig": []
     };
+
+    // Vul overig op tot 300:
+    for (let i = 10; i <= 300; i++) {
+      data["Overig"].push({ afkorting: `AFK${i}`, uitleg: `Beschrijving van afkorting ${i}` });
+    }
+
+    let score = 0;
+    let highscore = parseInt(localStorage.getItem("highscore") || "0");
+    let huidigeVraag = {};
 
     function startApp() {
       document.getElementById("mainApp").classList.remove("hidden");
+      document.getElementById("quizApp").classList.add("hidden");
       const select = document.getElementById("categorieSelect");
+      select.innerHTML = '<option value="">-- Kies een categorie --</option>';
       for (let categorie in data) {
         let option = document.createElement("option");
         option.value = categorie;
@@ -108,7 +96,59 @@
     function zoekAfkorting() {
       toonCategorie();
     }
-  </script>
 
+    function startQuiz() {
+      document.getElementById("mainApp").classList.add("hidden");
+      document.getElementById("quizApp").classList.remove("hidden");
+      score = 0;
+      updateScore();
+      volgendeVraag();
+    }
+
+    function stopQuiz() {
+      document.getElementById("mainApp").classList.remove("hidden");
+      document.getElementById("quizApp").classList.add("hidden");
+    }
+
+    function updateScore() {
+      if (score > highscore) {
+        highscore = score;
+        localStorage.setItem("highscore", highscore);
+      }
+      document.getElementById("scoreInfo").innerText = `Score: ${score} | Highscore: ${highscore}`;
+    }
+
+    function volgendeVraag() {
+      const alle = Object.values(data).flat();
+      huidigeVraag = alle[Math.floor(Math.random() * alle.length)];
+      const juisteAntwoord = huidigeVraag.uitleg;
+
+      const opties = new Set([juisteAntwoord]);
+      while (opties.size < 4) {
+        const andere = alle[Math.floor(Math.random() * alle.length)].uitleg;
+        opties.add(andere);
+      }
+
+      const optiesArray = Array.from(opties).sort(() => 0.5 - Math.random());
+
+      document.getElementById("quizVraag").innerText = `Wat betekent: ${huidigeVraag.afkorting}?`;
+      const optiesDiv = document.getElementById("quizOpties");
+      optiesDiv.innerHTML = "";
+
+      optiesArray.forEach(optie => {
+        const btn = document.createElement("button");
+        btn.className = "bg-white text-black py-2 px-4 rounded shadow";
+        btn.innerText = optie;
+        btn.onclick = () => {
+          if (optie === juisteAntwoord) {
+            score++;
+            updateScore();
+          }
+          volgendeVraag();
+        };
+        optiesDiv.appendChild(btn);
+      });
+    }
+  </script>
 </body>
 </html>
