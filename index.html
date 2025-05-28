@@ -32,18 +32,7 @@
       "Algemeen": [
         { afk: "AAT", uitleg: "Aan- en Afvoer Troepen" },
         { afk: "AMO", uitleg: "Algemene Militaire Opleiding" },
-        { afk: "CDS", uitleg: "Commandant der Strijdkrachten" },
-        { afk: "MIVD", uitleg: "Militaire Inlichtingen- en Veiligheidsdienst" },
-        { afk: "FOB", uitleg: "Forward Operating Base" },
-        { afk: "FTX", uitleg: "Field Training Exercise" },
-        { afk: "KLu", uitleg: "Koninklijke Luchtmacht" },
-        { afk: "KMar", uitleg: "Koninklijke Marechaussee" },
-        { afk: "MCW", uitleg: "Mechanisch Centrale Werkplaats" },
-        { afk: "MEOB", uitleg: "Marine Elektronisch en Optisch Bedrijf" },
-        { afk: "BSE", uitleg: "Battlefield Surgical Element" },
-        { afk: "SIGINT", uitleg: "Signals Intelligence" },
-        { afk: "ROE", uitleg: "Rules of Engagement" },
-        { afk: "ISTAR", uitleg: "Intelligence, Surveillance, Target Acquisition and Reconnaissance" }
+        { afk: "CDS", uitleg: "Commandant der Strijdkrachten" }
       ],
       "NAVO": [
         { afk: "NATO", uitleg: "North Atlantic Treaty Organization" },
@@ -52,131 +41,22 @@
       "Rangen": [
         { afk: "Sld", uitleg: "Soldaat" },
         { afk: "Kpl", uitleg: "Korporaal" },
-        { afk: "Sgt", uitleg: "Sergeant" },
-        { afk: "Lkol", uitleg: "Luitenant-kolonel" },
-        { afk: "Gen", uitleg: "Generaal" }
+        { afk: "Sgt", uitleg: "Sergeant" }
+      ],
+      "Uitdrukkingen": [
+        { afk: "aanmelden", uitleg: "Gestandaardiseerde wijze waarop men zich meldt bij een meerdere" },
+        { afk: "achter de wacht", uitleg: "Straf: verzwaard of streng arrest, verblijf achter de wachtcommandant" },
+        { afk: "adderbataljon", uitleg: "Spotnaam voor 104 verkenningsbataljon" },
+        { afk: "AVA-koe", uitleg: "Veldartillerist (Afdeling VeldArtillerie)" },
+        { afk: "apepak", uitleg: "Het gevechtspak" },
+        { afk: "apetuin", uitleg: "Hindernisbaan" }
+      ],
+      "Historisch (1941)": [
+        { afk: "Afd", uitleg: "Lu.A" },
+        { afk: "Bt", uitleg: "Lu.A" },
+        { afk: "Mot", uitleg: "M.Gr" },
+        { afk: "Vbd", uitleg: "A.-I" }
       ]
     };
-
-    let current = Object.keys(afkortingen)[0];
-    let quizIndex = 0;
-    let score = 0;
-    let shuffledQuestions = [];
-
-    function startApp() {
-      document.getElementById('intro').style.display = 'none';
-      document.getElementById('mainApp').style.display = 'block';
-      initOnderdeelKnoppen();
-      selectOnderdeel(current);
-      showHighScores();
-    }
-
-    function initOnderdeelKnoppen() {
-      const div = document.getElementById('onderdelen-buttons');
-      div.innerHTML = '';
-      for (let onderdeel in afkortingen) {
-        const btn = document.createElement('button');
-        btn.textContent = onderdeel;
-        btn.className = 'bg-purple-600 hover:bg-purple-800 px-4 py-2 rounded-lg font-semibold';
-        btn.onclick = () => selectOnderdeel(onderdeel);
-        div.appendChild(btn);
-      }
-    }
-
-    function selectOnderdeel(onderdeel) {
-      current = onderdeel;
-      toonFlashcards();
-    }
-
-    function toonFlashcards() {
-      const div = document.getElementById('output');
-      div.innerHTML = '';
-      afkortingen[current].forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'bg-white text-black p-4 rounded-lg shadow-xl text-center';
-        card.innerHTML = `<strong>${item.afk}</strong><br><small>${item.uitleg}</small>`;
-        div.appendChild(card);
-      });
-    }
-
-    function zoekAfkorting() {
-      const query = document.getElementById('zoekbalk').value.toLowerCase();
-      const div = document.getElementById('output');
-      div.innerHTML = '';
-      for (const onderdeel in afkortingen) {
-        afkortingen[onderdeel].filter(item =>
-          item.afk.toLowerCase().includes(query) || item.uitleg.toLowerCase().includes(query)
-        ).forEach(item => {
-          const card = document.createElement('div');
-          card.className = 'bg-white text-black p-4 rounded-lg shadow-xl text-center';
-          card.innerHTML = `<strong>${item.afk}</strong><br><small>${item.uitleg}</small>`;
-          div.appendChild(card);
-        });
-      }
-    }
-
-    function startQuiz() {
-      quizIndex = 0;
-      score = 0;
-      shuffledQuestions = shuffle([...afkortingen[current]]);
-      showQuiz();
-    }
-
-    function showQuiz() {
-      const vragen = shuffledQuestions;
-      if (quizIndex >= vragen.length) {
-        saveHighScore(score);
-        document.getElementById('output').innerHTML = `<div class='text-center'><h2 class='text-3xl'>Score: ${score} / ${vragen.length}</h2></div>`;
-        showHighScores();
-        return;
-      }
-      const vraag = vragen[quizIndex];
-      const opties = shuffle([vraag.uitleg, ...genereerAfleiders(vraag.uitleg)]);
-      let html = `<div class='bg-white text-black p-4 rounded-xl shadow-xl text-center'><h3 class='text-2xl mb-4'>${vraag.afk}</h3>`;
-      opties.forEach(optie => {
-        html += `<button onclick="checkAntwoordKeuze('${vraag.uitleg}', '${optie}')" class="block w-full bg-gray-200 hover:bg-gray-300 text-black font-semibold py-2 px-4 my-2 rounded-lg">${optie}</button>`;
-      });
-      html += '</div>';
-      document.getElementById('output').innerHTML = html;
-    }
-
-    function checkAntwoordKeuze(juiste, gekozen) {
-      if (gekozen === juiste) {
-        score++;
-        alert('✅ Goed zo!');
-      } else {
-        alert(`❌ Fout. Antwoord: ${juiste}`);
-      }
-      quizIndex++;
-      showQuiz();
-    }
-
-    function shuffle(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-      return array;
-    }
-
-    function genereerAfleiders(juiste) {
-      const alleUitleg = Object.values(afkortingen).flat().map(item => item.uitleg);
-      const unieke = alleUitleg.filter(u => u !== juiste);
-      return shuffle(unieke).slice(0, 3);
-    }
-
-    function saveHighScore(score) {
-      let scores = JSON.parse(localStorage.getItem("afkoapp-scores") || "[]");
-      scores.push(score);
-      scores.sort((a, b) => b - a);
-      scores = scores.slice(0, 5);
-      localStorage.setItem("afkoapp-scores", JSON.stringify(scores));
-    }
-
-    function showHighScores() {
-      const scores = JSON.parse(localStorage.getItem("afkoapp-scores") || "[]");
-      const div = document.getElementById("highscores");
-      div.innerHTML = `<h2 class='text-2xl font-bold mb-2'>Top Scores</h2><ul class='list-none'>${scores.map(s => `<li class='text-lg'>⭐ ${s}</li>`).join('')}</ul>`;
-    }
   </script></body>
 </html>
