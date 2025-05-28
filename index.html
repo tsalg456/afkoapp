@@ -2,21 +2,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Afkoapp Game Style</title>
+  <title>Afkoapp</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    html {
-      scroll-behavior: smooth;
-    }
-    button {
-      transition: all 0.3s ease-in-out;
-    }
+    html { scroll-behavior: smooth; }
+    button { transition: all 0.3s ease-in-out; }
   </style>
 </head>
 <body class="bg-gradient-to-br from-indigo-900 via-fuchsia-700 to-amber-700 min-h-screen text-white">
   <div id="intro" class="flex flex-col items-center justify-center min-h-screen">
     <h1 class="text-5xl font-bold mb-8 animate-bounce">Welkom bij Afkoapp</h1>
-    <button onclick="startApp()" class="px-6 py-3 bg-yellow-500 hover:bg-yellow-600 rounded-full text-xl font-bold shadow-lg transition-all">Ik ben de baas</button>
+    <button onclick="startApp()" class="px-6 py-3 bg-yellow-500 hover:bg-yellow-600 rounded-full text-xl font-bold shadow-lg">Ik ben de baas</button>
   </div>  <div id="mainApp" class="hidden p-4">
     <div class="fixed top-4 right-4 bg-black bg-opacity-30 rounded-lg p-3 shadow-lg flex flex-col gap-2 z-50">
       <button onclick="toonFlashcards()" class="bg-blue-500 hover:bg-blue-700 px-4 py-2 rounded-lg font-bold">Flashcards</button>
@@ -29,21 +25,21 @@
 
   </div>  <script>
     const afkortingen = {
-      "Algemeen": [
+      Algemeen: [
         { afk: "AAT", uitleg: "Aan- en Afvoer Troepen" },
         { afk: "AMO", uitleg: "Algemene Militaire Opleiding" },
         { afk: "CDS", uitleg: "Commandant der Strijdkrachten" }
       ],
-      "NAVO": [
+      NAVO: [
         { afk: "NATO", uitleg: "North Atlantic Treaty Organization" },
         { afk: "AWACS", uitleg: "Airborne Warning and Control System" }
       ],
-      "Rangen": [
+      Rangen: [
         { afk: "Sld", uitleg: "Soldaat" },
         { afk: "Kpl", uitleg: "Korporaal" },
         { afk: "Sgt", uitleg: "Sergeant" }
       ],
-      "Uitdrukkingen": [
+      Uitdrukkingen: [
         { afk: "aanmelden", uitleg: "Gestandaardiseerde wijze waarop men zich meldt bij een meerdere" },
         { afk: "achter de wacht", uitleg: "Straf: verzwaard of streng arrest, verblijf achter de wachtcommandant" },
         { afk: "adderbataljon", uitleg: "Spotnaam voor 104 verkenningsbataljon" },
@@ -52,11 +48,55 @@
         { afk: "apetuin", uitleg: "Hindernisbaan" }
       ],
       "Historisch (1941)": [
-        { afk: "Afd", uitleg: "Lu.A" },
-        { afk: "Bt", uitleg: "Lu.A" },
-        { afk: "Mot", uitleg: "M.Gr" },
-        { afk: "Vbd", uitleg: "A.-I" }
+        { afk: "Afd", uitleg: "Afdeeling" },
+        { afk: "Bt", uitleg: "Bataljon" },
+        { afk: "Mot", uitleg: "Motorcompagnie" },
+        { afk: "Vbd", uitleg: "Verdedigingslinie" }
       ]
     };
+
+    function startApp() {
+      document.getElementById('intro').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
+      initOnderdeelKnoppen();
+      selectOnderdeel(Object.keys(afkortingen)[0]);
+    }
+
+    function initOnderdeelKnoppen() {
+      const container = document.getElementById('onderdelen-buttons');
+      container.innerHTML = '';
+      Object.keys(afkortingen).forEach(cat => {
+        const btn = document.createElement('button');
+        btn.textContent = cat;
+        btn.className = 'bg-white text-black px-4 py-2 rounded shadow';
+        btn.onclick = () => selectOnderdeel(cat);
+        container.appendChild(btn);
+      });
+    }
+
+    function selectOnderdeel(cat) {
+      const output = document.getElementById('output');
+      output.innerHTML = '';
+      afkortingen[cat].forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'bg-white text-black p-4 rounded shadow';
+        card.innerHTML = `<strong>${item.afk}</strong>: ${item.uitleg}`;
+        output.appendChild(card);
+      });
+    }
+
+    function zoekAfkorting() {
+      const zoekterm = document.getElementById('zoekbalk').value.toLowerCase().trim();
+      const output = document.getElementById('output');
+      output.innerHTML = '';
+      Object.values(afkortingen).flat().forEach(item => {
+        if (item.afk.toLowerCase().includes(zoekterm) || item.uitleg.toLowerCase().includes(zoekterm)) {
+          const card = document.createElement('div');
+          card.className = 'bg-white text-black p-4 rounded shadow';
+          card.innerHTML = `<strong>${item.afk}</strong>: ${item.uitleg}`;
+          output.appendChild(card);
+        }
+      });
+    }
   </script></body>
 </html>
