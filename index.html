@@ -1,29 +1,27 @@
 <!DOCTYPE html><html lang="nl">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Afkoapp Leerplatform</title>
+  <title>Afkoapp - Leer Militaire Afkortingen</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     html { scroll-behavior: smooth; }
-    button { transition: all 0.3s ease-in-out; }
-    select, input { border: none; outline: none; }
+    button, select, input { transition: all 0.3s ease-in-out; border: none; outline: none; }
+    .card { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(5px); }
   </style>
 </head>
-<body class="bg-gradient-to-br from-blue-900 via-purple-800 to-rose-700 min-h-screen text-white font-sans">
-  <!-- Startpagina -->
-  <div id="intro" class="flex flex-col items-center justify-center min-h-screen text-center px-4">
-    <h1 class="text-6xl font-bold mb-6">Afkoapp</h1>
-    <p class="mb-6 text-lg">Leer militaire afkortingen eenvoudig via overzichtelijke categorieën</p>
-    <button onclick="startApp()" class="px-6 py-3 bg-yellow-400 hover:bg-yellow-500 rounded-full text-xl font-semibold shadow-md">
-      Ik ben de baas
+<body class="bg-gradient-to-br from-indigo-900 via-purple-800 to-fuchsia-800 min-h-screen text-white font-sans">  <!-- Startpagina -->  <div id="intro" class="flex flex-col items-center justify-center min-h-screen text-center px-6">
+    <h1 class="text-5xl font-extrabold mb-4">Afkoapp</h1>
+    <p class="text-lg mb-6">Leer militaire afkortingen zoals je talen leert met Duolingo</p>
+    <button onclick="startApp()" class="bg-green-500 hover:bg-green-600 text-white text-lg px-6 py-3 rounded-full shadow-lg">
+      Start met leren
     </button>
-  </div>  <!-- App content -->  <div id="mainApp" class="hidden px-4 py-6">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-2xl font-bold">Zoek of selecteer een categorie</h2>
-      <select onchange="filterCategorie(this.value)" class="bg-white text-black p-2 rounded-lg">
-        <option value="">-- Categorie --</option>
-        <option value="afkortingen">Afkortingen (A-Z)</option>
+  </div>  <!-- App-content -->  <div id="mainApp" class="hidden px-4 py-6">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl font-bold">Kies een categorie of zoek</h2>
+      <select onchange="filterCategorie(this.value)" class="bg-white text-black px-4 py-2 rounded-lg">
+        <option value="">-- Selecteer --</option>
+        <option value="afkortingen">Alle Afkortingen</option>
         <option value="landmacht">Landmacht</option>
         <option value="luchtmacht">Luchtmacht</option>
         <option value="marine">Marine</option>
@@ -32,10 +30,22 @@
         <option value="vakken">Vakken</option>
         <option value="onderdelen">Onderdelen</option>
       </select>
-    </div><input id="zoekbalk" type="text" placeholder="Zoek een afkorting..." oninput="zoekAfkorting()" class="w-full max-w-xl p-3 mb-6 rounded-lg text-black">
-<div id="output" class="grid gap-4"></div>
+    </div><input id="zoekbalk" type="text" placeholder="Zoek een afkorting..." oninput="zoekAfkorting()" class="w-full max-w-xl p-3 rounded-lg text-black mb-4">
 
-  </div>  <script>
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4" id="output"></div>
+
+<div class="mt-10 text-center">
+  <h3 class="text-xl font-semibold mb-2">Punten: <span id="score">0</span></h3>
+  <h3 class="text-lg">Level: <span id="level">1</span> | Streak: <span id="streak">0</span> 🔥 | Badges: <span id="badges">0</span> 🏅</h3>
+  <button onclick="startQuiz()" class="bg-yellow-400 hover:bg-yellow-500 px-4 py-2 mt-2 rounded-lg shadow">Start Quiz</button>
+</div>
+
+  </div>  <!-- Scripts -->  <script>
+    let score = 0;
+    let level = 1;
+    let streak = 0;
+    let badges = 0;
+
     const data = {
       afkortingen: [
         { afkorting: "Afst", uitleg: "Afstand" },
@@ -52,34 +62,19 @@
         { afkorting: "E", uitleg: "Onderdeel E" },
         { afkorting: "F", uitleg: "Onderdeel F" }
       ],
-      landmacht: [
-        { afkorting: "GEN", uitleg: "Generaal" },
-        { afkorting: "LGEN", uitleg: "Luitenant-generaal" }
-      ],
-      luchtmacht: [
-        { afkorting: "COMM", uitleg: "Commodore" }
-      ],
-      marine: [
-        { afkorting: "LADM", uitleg: "Luitenant-admiraal" }
-      ],
-      marechaussee: [
-        { afkorting: "WM", uitleg: "Wachtmeester" }
-      ],
-      historisch: [
-        { afkorting: "VM", uitleg: "Veldmaarschalk" }
-      ],
-      vakken: [
-        { afkorting: "Vak A", uitleg: "Opleidingsonderdeel A" }
-      ],
-      onderdelen: [
-        { afkorting: "Peloton", uitleg: "Militaire eenheid van ca. 30 man" }
-      ]
+      landmacht: [ { afkorting: "GEN", uitleg: "Generaal" } ],
+      luchtmacht: [ { afkorting: "COMM", uitleg: "Commodore" } ],
+      marine: [ { afkorting: "LADM", uitleg: "Luitenant-admiraal" } ],
+      marechaussee: [ { afkorting: "WM", uitleg: "Wachtmeester" } ],
+      historisch: [ { afkorting: "VM", uitleg: "Veldmaarschalk" } ],
+      vakken: [ { afkorting: "Vak A", uitleg: "Opleidingsonderdeel A" } ],
+      onderdelen: [ { afkorting: "Peloton", uitleg: "Militaire eenheid van ca. 30 man" } ]
     };
 
     function startApp() {
-      document.getElementById('intro').classList.add('hidden');
-      document.getElementById('mainApp').classList.remove('hidden');
-      toonAfkortingen('afkortingen');
+      document.getElementById("intro").classList.add("hidden");
+      document.getElementById("mainApp").classList.remove("hidden");
+      toonAfkortingen("afkortingen");
     }
 
     function filterCategorie(cat) {
@@ -87,22 +82,43 @@
     }
 
     function toonAfkortingen(cat) {
-      const lijst = data[cat] || [];
-      const gesorteerd = lijst.sort((a, b) => a.afkorting.localeCompare(b.afkorting));
-      document.getElementById("output").innerHTML = gesorteerd
-        .map(x => `<div class='p-4 bg-white bg-opacity-10 rounded-xl shadow'><strong>${x.afkorting}</strong>: ${x.uitleg}</div>`) 
-        .join("");
+      const lijst = (data[cat] || []).sort((a, b) => a.afkorting.localeCompare(b.afkorting));
+      document.getElementById("output").innerHTML = lijst.map(x => `<div class='card p-4 rounded-lg shadow'><strong>${x.afkorting}</strong><br>${x.uitleg}</div>`).join("");
     }
 
     function zoekAfkorting() {
-      const query = document.getElementById("zoekbalk").value.toLowerCase();
+      const q = document.getElementById("zoekbalk").value.toLowerCase();
       let resultaten = [];
       Object.values(data).flat().forEach(x => {
-        if (x.afkorting.toLowerCase().includes(query) || x.uitleg.toLowerCase().includes(query)) {
-          resultaten.push(`<div class='p-4 bg-white bg-opacity-10 rounded-xl shadow'><strong>${x.afkorting}</strong>: ${x.uitleg}</div>`);
+        if (x.afkorting.toLowerCase().includes(q) || x.uitleg.toLowerCase().includes(q)) {
+          resultaten.push(`<div class='card p-4 rounded-lg shadow'><strong>${x.afkorting}</strong><br>${x.uitleg}</div>`);
         }
       });
       document.getElementById("output").innerHTML = resultaten.join("");
+    }
+
+    function updateGamification() {
+      document.getElementById("score").innerText = score;
+      document.getElementById("level").innerText = level;
+      document.getElementById("streak").innerText = streak;
+      document.getElementById("badges").innerText = badges;
+    }
+
+    function startQuiz() {
+      const allItems = Object.values(data).flat();
+      const randomItem = allItems[Math.floor(Math.random() * allItems.length)];
+      const antwoord = prompt(`Wat betekent: ${randomItem.afkorting}?`).trim().toLowerCase();
+      if (antwoord === randomItem.uitleg.toLowerCase()) {
+        score++;
+        streak++;
+        if (streak % 5 === 0) badges++;
+        if (score % 10 === 0) level++;
+        alert("✅ Goed zo!");
+      } else {
+        alert(`❌ Fout! Correct antwoord: ${randomItem.uitleg}`);
+        streak = 0;
+      }
+      updateGamification();
     }
   </script></body>
 </html>
